@@ -21,11 +21,11 @@ io.on('connection', (socket) => {
         const newMessage = new messageModel(message);
         await newMessage.save();
         const getMessages = await messageModel.find<Message>();
-        socket.emit('serverMessage', getMessages);
+        io.sockets.emit('serverMessage', getMessages);
     });
     socket.on('clientSearchMessagess', async () => {
         const getMessages = await messageModel.find<Message>();
-        socket.emit('serverSearchMessagess', getMessages);
+        io.sockets.emit('serverSearchMessagess', getMessages);
     });
 });
 

@@ -50,11 +50,11 @@ io.on('connection', (socket) => {
         const newMessage = new Login_1.messageModel(message);
         yield newMessage.save();
         const getMessages = yield Login_1.messageModel.find();
-        socket.emit('serverMessage', getMessages);
+        io.sockets.emit('serverMessage', getMessages);
     }));
     socket.on('clientSearchMessagess', () => __awaiter(void 0, void 0, void 0, function* () {
         const getMessages = yield Login_1.messageModel.find();
-        socket.emit('serverSearchMessagess', getMessages);
+        io.sockets.emit('serverSearchMessagess', getMessages);
     }));
 });
 dotenv_1.default.config();

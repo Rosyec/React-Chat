@@ -17,6 +17,7 @@ import {
 import { useForm } from "./hooks/useForm";
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
+  // "http://localhost:3550"
   "https://chat-socket.azurewebsites.net"
 ); // Inicializa el socket.io-client fuera de la función
 
@@ -42,13 +43,6 @@ export const Chat = () => {
     setCanSendMessage(false);
   };
 
-  socket.on("serverMessage", (data) => {
-    if (data.length === messagess.length) return;
-    console.log('No es igual')
-    setMessagess([...data]);
-    scrollToBottom();
-  });
-
   useEffect(() => {
     // Después de 3 segundos, se puede volver a enviar otro mensaje
     const timeout = setTimeout(() => {
@@ -60,29 +54,34 @@ export const Chat = () => {
 
   useEffect(() => {
     socket.on("serverMessage", (data) => {
-    setMessagess([...data]);
+      setMessagess(data);
+      scrollToBottom();
     });
-
     return () => {
       socket.off("serverMessage", (data) => {
-        setMessagess([...data]);
+        setMessagess(data);
       });
     };
-  }, [message]);
+  }, []);
 
   useEffect(() => {
     socket.emit("clientSearchMessagess");
-  }, [message, messagess]);
+  }, []);
 
   useEffect(() => {
-    socket.on("serverSearchMessagess", (messagessArray) => {
-      setMessagess([...messagessArray]);
+    socket.on("serverSearchMessagess", (data) => {
+      setMessagess(data);
     });
-  }, [message, messagess]);
+    return () => {
+      socket.off("serverSearchMessagess", (data) => {
+        setMessagess(data);
+      });
+    };
+  }, []);
 
-  // useEffect(() => {
-  //   scrollToBottom();
-  // }, [messagess]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messagess]);
 
   const onEnter = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     if (evt.code === "Enter") {
@@ -131,7 +130,7 @@ export const Chat = () => {
                       style={
                         email !== User.email
                           ? { backgroundColor: "blueviolet", color: "white" }
-                          : {backgroundColor: "#F3F4F6", color: "black"}
+                          : { backgroundColor: "#F3F4F6", color: "black" }
                       }
                     >
                       <span id="displayName"> {displayName} </span>
@@ -140,7 +139,14 @@ export const Chat = () => {
                     <div className="message__picture">
                       <img
                         style={{ height: "2em", width: "2em" }}
-                        src={(photoURL.includes('graph.facebook.com') ? photoURL + "?access_token=" + token + "&type=large" : photoURL )}
+                        src={
+                          photoURL.includes("graph.facebook.com")
+                            ? photoURL +
+                              "?access_token=" +
+                              token +
+                              "&type=large"
+                            : photoURL
+                        }
                         referrerPolicy="no-referrer"
                         alt="Profile"
                       />
